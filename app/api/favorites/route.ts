@@ -1,0 +1,5 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+async function current() { const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser(); return { supabase, user }; }
+export async function POST(request: Request) { const { tutorId } = await request.json(); const { supabase, user } = await current(); if (!user) return NextResponse.json({ error: "Потрібен вхід" }, { status: 401 }); const { error } = await supabase.from("favorites").upsert({ user_id: user.id, tutor_id: tutorId }); return error ? NextResponse.json({ error: error.message }, { status: 400 }) : NextResponse.json({ ok: true }); }
+export async function DELETE(request: Request) { const { tutorId } = await request.json(); const { supabase, user } = await current(); if (!user) return NextResponse.json({ error: "Потрібен вхід" }, { status: 401 }); const { error } = await supabase.from("favorites").delete().eq("user_id", user.id).eq("tutor_id", tutorId); return error ? NextResponse.json({ error: error.message }, { status: 400 }) : NextResponse.json({ ok: true }); }
