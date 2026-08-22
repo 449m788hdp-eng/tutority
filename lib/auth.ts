@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { hasSupabaseEnv } from "@/lib/env";
 
 export async function requireUser() {
+  if (!hasSupabaseEnv()) redirect("/setup");
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
